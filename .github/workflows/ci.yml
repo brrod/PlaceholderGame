@@ -1,0 +1,50 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ develop, feature/** ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        lfs: true
+
+    - name: Cache Unity
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/unity
+          Library
+        key: ${{ runner.os }}-unity-${{ hashFiles('**/ProjectSettings/ProjectVersion.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-unity-
+
+    - name: Setup Unity
+      uses: game-ci/unity-actions/setup@v2
+      with:
+        unityVersion: 2021.3.11f1  # Replace with your Unity version
+
+    - name: Build project
+      uses: game-ci/unity-actions/build@v2
+      with:
+        targetPlatform: StandaloneWindows64  # Adjust as needed
+        buildName: GameBuild
+        buildPath: build/
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: GameBuild
+        path: build/
+        
+    - name: Run unit tests
+      uses: game-ci/unity-actions/test@v2
+      with:
+        testMode: playmode  # or editmode
