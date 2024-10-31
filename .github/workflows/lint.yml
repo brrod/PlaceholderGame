@@ -1,0 +1,29 @@
+name: Lint Code
+
+on:
+  push:
+    branches: [ develop, feature/** ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'  # Adjust based on your project
+
+    - name: Install EditorConfig CLI
+      run: |
+        dotnet tool install -g dotnet-editorconfig
+        export PATH="$PATH:/home/runner/.dotnet/tools"
+
+    - name: Run EditorConfig
+      run: |
+        dotnet editorconfig check
